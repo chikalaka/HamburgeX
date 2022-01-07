@@ -1,15 +1,18 @@
-import React, {Component} from 'react'
-import {render} from 'react-dom'
+import React from "react"
+import { render } from "react-dom"
 
-import Example from '../../src'
+import { HamburgeXpress } from "../../src"
 
-export default class Demo extends Component {
-  render() {
-    return <div>
-      <h1>HamburgeX Demo</h1>
-      <Example/>
-    </div>
-  }
+const Demo = () => {
+
+    return (
+        <div>
+            hi all
+            <HamburgeXpress />
+        </div>
+    )
 }
 
-render(<Demo/>, document.querySelector('#demo'))
+export default Demo
+
+render(<Demo />, document.querySelector("#demo"))

@@ -1,5 +1,5 @@
-const trigger = (func, ...params) =>
-    typeof func === "function" && func(...params)
+import React from "react"
+import { trigger } from "./utils"
 
 const getStyles = ({ color, size }) => {
     return {
@@ -26,24 +26,13 @@ const getStyles = ({ color, size }) => {
 // classes = {topLine, midLine, bottomLine}
 // size = 'small' | 'medium' | 'large' | number
 
-// types: all the regular props except for the isOpen
-const HamburgeXpress = ({ onClick, ...props }) => {
-    const [isOpen, setIsOpen] = useState()
-    const innerOnClick = isOpen => {
-        setIsOpen(!isOpen)
-        trigger(onClick, isOpen)
-    }
-
-    return <HamburgeX isOpen={isOpen} onClick={innerOnClick} {...props} />
-}
-
 // lineType = top, mid, bottom
 const Line = ({ isOpen, lineType, color, size, classes }) => {
     const styles = getStyles({ color, size })
-    const lineStyles = styles.line
-    if(isOpen) lineStyles = {...lineStyles, ...styles[lineType]}
+    let lineStyles = styles.line
+    if (!isOpen) lineStyles = { ...lineStyles, ...styles[lineType] }
 
-    return <div styles={lineStyles} />
+    return <div style={lineStyles} />
 }
 
 const getLineComp =
@@ -66,14 +55,15 @@ const HamburgeX = ({
         trigger(onClick, isOpen)
     }
 
-    // const LineComp = getLineComp({ isOpen, color, size, classes })
+    const lineProps = { isOpen, color, size, classes }
 
     return (
         <div onClick={clickHandler} className={className}>
-            {/* <LineComp lineType={"top"} /> */}
-            <Line isOpen={isOpen} lineType={"top"} color={color} />
-            <Line isOpen={isOpen} lineType={"mid"} color={color} />
-            <Line isOpen={isOpen} lineType={"bootom"} color={color} />
+            <Line {...lineProps} lineType={"top"} />
+            <Line {...lineProps} lineType={"mid"} />
+            <Line {...lineProps} lineType={"bottom"} />
         </div>
     )
 }
+
+export default HamburgeX
