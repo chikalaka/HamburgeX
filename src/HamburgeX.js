@@ -1,44 +1,93 @@
 import React from "react"
-import { trigger } from "./utils"
+import { trigger, areSameParity, match } from "./utils"
 
-const getStyles = ({ color, size }) => {
+const ULTIMATE_WIDTH_HEIGHT_RATIO = 0.71
+
+const getSizes = size => {
+    const width = 15 + 5 * size
+    const lineHeight = Math.round(width / 7)
+
+    const calcDependOnWidthAndLineHeight = width - 2 * lineHeight
+
+    const height = areSameParity(lineHeight, calcDependOnWidthAndLineHeight)
+        ? calcDependOnWidthAndLineHeight
+        : (() => {
+              const heightWidthRatio = calcDependOnWidthAndLineHeight / width
+              const addition =
+                  heightWidthRatio > ULTIMATE_WIDTH_HEIGHT_RATIO ? -1 : 1
+              return calcDependOnWidthAndLineHeight + addition
+          })()
+
     return {
+        width,
+        height,
+        lineHeight
+    }
+}
+
+const getStyles = ({ color, size = "medium", styles }) => {
+    const _size = match(size, {
+        small: 2,
+        medium: 4,
+        large: 6,
+        default: size
+    })
+
+    const { width, height, lineHeight } = getSizes(_size)
+    const translateY = Math.round((height - lineHeight) / 2)
+
+    return {
+        container: {
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            cursor: "pointer",
+            width: width,
+            height: height,
+            padding: 5,
+            ...styles?.container
+        },
         line: {
             transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-            background: "black" || color,
-            height: 5,
-            width: 50,
+            background: color || "black",
+            height: lineHeight,
             borderRadius: 100,
-            margin: "10px 0"
+            ...styles?.line
         },
         top: {
-            transform: "translate(0, 15px) rotate(135deg)"
+            close: {
+                transform: `translate(0, ${translateY}px) rotate(135deg)`,
+                ...styles?.top?.close
+            },
+            open: { ...styles?.top?.open }
         },
         mid: {
-            transform: "rotate(-405deg)"
+            close: {
+                transform: `rotate(-405deg)`,
+                ...styles?.mid?.close
+            },
+            open: { ...styles?.mid?.open }
         },
         bottom: {
-            transform: "translate(0, -15px) rotate(-135deg)"
+            close: {
+                transform: `translate(0, ${-1 * translateY}px) rotate(-135deg)`,
+                ...styles?.bottom?.close
+            },
+            open: { ...styles?.bottom?.open }
         }
     }
 }
 
-// classes = {topLine, midLine, bottomLine}
-// size = 'small' | 'medium' | 'large' | number
+const Line = ({ isOpen, lineType, color, size, classes, styles }) => {
+    const _styles = getStyles({ color, size, styles })
+    let lineStyle = _styles.line
+    const typeStyle = isOpen
+        ? { ..._styles[lineType].open }
+        : { ..._styles[lineType].close }
+    const style = { ...lineStyle, ...typeStyle }
 
-// lineType = top, mid, bottom
-const Line = ({ isOpen, lineType, color, size, classes }) => {
-    const styles = getStyles({ color, size })
-    let lineStyles = styles.line
-    if (!isOpen) lineStyles = { ...lineStyles, ...styles[lineType] }
-
-    return <div style={lineStyles} />
+    return <div style={style} />
 }
-
-const getLineComp =
-    ({ ...firstProps }) =>
-    ({ ...secondProps }) =>
-        <Line {...firstProps} {...secondProps} />
 
 const HamburgeX = ({
     onClick,
@@ -47,6 +96,7 @@ const HamburgeX = ({
     isOpen,
     size,
     classes,
+    styles,
     className,
     color
 }) => {
@@ -55,10 +105,16 @@ const HamburgeX = ({
         trigger(onClick, isOpen)
     }
 
-    const lineProps = { isOpen, color, size, classes }
+    const lineProps = { isOpen, color, size, classes, styles }
+
+    const containerStyle = getStyles({ size, styles }).container
 
     return (
-        <div onClick={clickHandler} className={className}>
+        <div
+            onClick={clickHandler}
+            style={containerStyle}
+            className={className}
+        >
             <Line {...lineProps} lineType={"top"} />
             <Line {...lineProps} lineType={"mid"} />
             <Line {...lineProps} lineType={"bottom"} />
